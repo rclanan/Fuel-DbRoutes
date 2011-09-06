@@ -9,7 +9,7 @@
     CREATE TABLE IF NOT EXISTS `dbroutes` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `route` text NOT NULL,
-    `real_route` text NOT NULL,
+    `translation` text NOT NULL,
     PRIMARY KEY (`id`)
     );
 
@@ -34,7 +34,7 @@
 
         foreach ($db_routes as $dbr)
         {
-            $dbroutes[$dbr['route']] = unserialize($dbr['real_route']);
+            $dbroutes[$dbr['route']] = unserialize($dbr['translation']);
         }
 
         $routes = array_merge((array)$routes, (array)$dbroutes);
@@ -51,28 +51,28 @@
 
     *$named_route to allow for the support of named routes
 
-    *$real_route the actual real route. Suggested field input type textarea
+    *$translation the actual real route. Suggested field input type textarea
 
     Basic example processing below:
 
     *** The data below would come from form input
     $url_route = 'logout';
     $named_route = 'logout';
-    $real_route = 'user/user/logout';
+    $translation = 'user/user/logout';
 
     // Process the data and allow for named routes
     if ( ! empty($named_route))
     {
-        $route = array('name' => $named_route, $real_route);
+        $route = array('name' => $named_route, $translation);
     }
     else
     {
-        $route = $real_route;
+        $route = $translation;
     }
 
     $data = array(
         'route' => $url_route,
-        'real_route' => serialize($route)
+        'translation' => serialize($route)
     );
 
     // Then delete the cache
