@@ -31,14 +31,15 @@
 
         // Note: The real_route is serialized to support named routes
         $db_routes = DB::select('*')->from('dbroutes')->execute()->as_array();
+        if ($db_routes)
+		{
+        	foreach ($db_routes as $dbr)
+        	{
+            	$dbroutes[$dbr['route']] = unserialize($dbr['translation']);
+        	}
 
-        foreach ($db_routes as $dbr)
-        {
-            $dbroutes[$dbr['route']] = unserialize($dbr['translation']);
+        	$routes = array_merge((array)$routes, (array)$dbroutes);
         }
-
-        $routes = array_merge((array)$routes, (array)$dbroutes);
-
         Cache::set('routes', $routes);
     }
     return $routes;
