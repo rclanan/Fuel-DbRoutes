@@ -46,6 +46,6 @@ class DbRoutes {
 	public static function refresh($table = 'dbroutes')
 	{
 		Cache::delete('routes');
-		return DbRoutes::load('dbroutes');
+		return DbRoutes::load($table);
 	}
 }
