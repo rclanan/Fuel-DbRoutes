@@ -1,82 +1,64 @@
 #DbRoutes
 
-    Store all of the application routes in a database table.
+Store all of the application routes in a database table.
 
 ###Configuration
 
-    Create the dbroutes database table
+Create the dbroutes database table
 
     CREATE TABLE IF NOT EXISTS `dbroutes` (
-    `id` int(11) NOT NULL AUTO_INCREMENT,
-    `route` text NOT NULL,
-    `translation` text NOT NULL,
-    PRIMARY KEY (`id`)
+        `id` int(11) NOT NULL AUTO_INCREMENT,
+        `route` text NOT NULL,
+        `translation` text NOT NULL,
+        PRIMARY KEY (`id`)
     );
 
 ###Installation
 
-    Replace app/config/routes.php with the following
+1.  Place `classes/dbroutes.php` in `fuel/app/classes/`.
+2.  Replace `fuel/app/config/routes.php` with the one from this repository in `config/routes.php`.
 
-    <?php
-    try
-    {
-        $routes = Cache::get('routes');
-    }
-    catch(CacheNotFoundException $e)
-    {
-        $routes = array(
-            '_root_'        => 'welcome/index',  // The default route
-            '_404_'         => 'welcome/404',    // The main 404 route
-        );
-
-        // Note: The real_route is serialized to support named routes
-        $db_routes = DB::select('*')->from('dbroutes')->execute()->as_array();
-        if ($db_routes)
-		{
-        	foreach ($db_routes as $dbr)
-        	{
-            	$dbroutes[$dbr['route']] = unserialize($dbr['translation']);
-        	}
-
-        	$routes = array_merge((array)$routes, (array)$dbroutes);
-        }
-        Cache::set('routes', $routes);
-    }
-    return $routes;
+Thats it!
 
 ###Administration
 
-    In an admin form allow for three inputs:
+In an admin form allow for three inputs:
 
-    *$url_route Suggested field input type textarea
+* `$url_route` Suggested field input type textarea
+* `$named_route` to allow for the support of named routes
+* `$translation` the actual real route. Suggested field input type textarea
 
-    *$named_route to allow for the support of named routes
+Basic example processing below:
 
-    *$translation the actual real route. Suggested field input type textarea
+```php
+<?php
 
-    Basic example processing below:
+// The data below would come from form input
+$url_route = 'logout';
+$named_route = 'logout';
+$translation = 'user/user/logout';
 
-    *** The data below would come from form input
-    $url_route = 'logout';
-    $named_route = 'logout';
-    $translation = 'user/user/logout';
+// Process the data and allow for named routes
+if ( ! empty($named_route))
+{
+    $route = array('name' => $named_route, $translation);
+}
+else
+{
+    $route = $translation;
+}
 
-    // Process the data and allow for named routes
-    if ( ! empty($named_route))
-    {
-        $route = array('name' => $named_route, $translation);
-    }
-    else
-    {
-        $route = $translation;
-    }
+$data = array(
+    'route' => $url_route,
+    'translation' => serialize($route)
+);
 
-    $data = array(
-        'route' => $url_route,
-        'translation' => serialize($route)
-    );
 
-    // Then delete the cache
-    Cache::delete('routes');
+// Put your code to insert the route into the database or update
+// it here
 
-    // Then save the new route to the database table
+
+// Then recache the routes
+DbRoutes::refresh('dbroutes');
+
+```
